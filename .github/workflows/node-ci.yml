@@ -1,0 +1,65 @@
+# =====================================================================
+# CI para proyectos Node.js: instala, ejecuta lint y tests
+# en una matriz de versiones (20 y 22).
+#
+# QUE CAMBIAR:
+#   - "node-version" en la matriz: agrega o quita versiones LTS.
+#   - Los comandos "npm run lint" y "npm test": usa los scripts
+#     que existan en tu package.json.
+#   - Si usas pnpm o yarn, revisa los comentarios marcados con (pnpm/yarn).
+# REQUISITOS: un package-lock.json versionado (npm ci lo necesita).
+# =====================================================================
+name: Node.js CI
+
+on:
+  push:
+    branches: [main]          # Cambia "main" si tu rama principal tiene otro nombre
+  pull_request:
+    branches: [main]
+
+# Cancela ejecuciones viejas de la misma rama/PR para ahorrar minutos.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Permisos mínimos: este workflow solo necesita leer el código.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint y tests (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15        # Evita que un job colgado consuma minutos
+    strategy:
+      fail-fast: false         # Si falla Node 20, igual vemos el resultado de Node 22
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          # Caché automática de ~/.npm basada en package-lock.json.
+          # (pnpm/yarn) Cambia a "pnpm" o "yarn" según tu gestor.
+          cache: npm
+
+      # (pnpm) Si usas pnpm, agrega ANTES de setup-node:
+      #   - uses: pnpm/action-setup@v4
+      #     with: { version: 9 }
+      # y reemplaza "npm ci" por "pnpm install --frozen-lockfile".
+
+      - name: Instalar dependencias (reproducible)
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint      # Borra este paso si tu proyecto no tiene linter
+
+      - name: Tests
+        run: npm test
+        env:
+          CI: true             # Muchos test runners desactivan el modo "watch" con CI=true

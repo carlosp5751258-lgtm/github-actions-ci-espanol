@@ -1,0 +1,70 @@
+# =====================================================================
+# AUDITORIA PROGRAMADA DE DEPENDENCIAS
+#
+# Revisa cada lunes si tus dependencias tienen vulnerabilidades
+# conocidas. Si encuentra algo, el job falla y GitHub te avisa por
+# correo (según tu configuración de notificaciones).
+#
+# QUE CAMBIAR:
+#   - El "cron" (está en UTC). "0 12 * * 1" = lunes 12:00 UTC
+#     (06:00 en Ciudad de México, 07:00 en Bogotá/Lima).
+#   - Borra los jobs de los lenguajes que no uses.
+#   - Nivel mínimo en npm audit (--audit-level): low, moderate, high, critical.
+# Nota: GitHub desactiva los workflows programados en repos públicos
+# sin actividad durante 60 días. Un commit los reactiva.
+# =====================================================================
+name: Auditoría de dependencias
+
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:       # Para ejecutarlo a mano cuando quieras
+
+permissions:
+  contents: read
+
+jobs:
+  npm:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # hashFiles() no se puede usar en el "if" de un job, solo en pasos.
+      # Por eso cada paso comprueba si existe el archivo; si no, se salta.
+      - if: hashFiles('package-lock.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Solo dependencias de producción y severidad alta o crítica.
+      - if: hashFiles('package-lock.json') != ''
+        run: npm audit --omit=dev --audit-level=high
+
+  python:
+    name: pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - if: hashFiles('requirements.txt') != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - if: hashFiles('requirements.txt') != ''
+        run: pip install pip-audit
+      # Si usas uv: uv export --format requirements-txt > requirements.txt
+      - if: hashFiles('requirements.txt') != ''
+        run: pip-audit -r requirements.txt
+
+  go:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - if: hashFiles('go.mod') != ''
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      # govulncheck solo reporta vulnerabilidades en código que realmente llamas.
+      - if: hashFiles('go.mod') != ''
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - if: hashFiles('go.mod') != ''
+        run: govulncheck ./...

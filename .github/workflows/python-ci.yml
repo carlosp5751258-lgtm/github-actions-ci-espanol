@@ -1,0 +1,75 @@
+# =====================================================================
+# CI para proyectos Python usando uv (gestor rápido de Astral),
+# ruff (lint + formato) y pytest, en Python 3.11, 3.12 y 3.13.
+#
+# QUE CAMBIAR:
+#   - La matriz "python-version".
+#   - Si no usas pyproject.toml + uv.lock, mira la alternativa con pip
+#     al final del archivo.
+#   - El directorio de tests (por defecto pytest los descubre solo).
+# REQUISITOS: pyproject.toml con ruff y pytest como dependencias de
+#   desarrollo, por ejemplo:  uv add --dev ruff pytest
+# =====================================================================
+name: Python CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Ruff y pytest (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]   # Entre comillas: 3.10 sin comillas se lee como 3.1
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar uv (con caché)
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true                 # Cachea el directorio de uv entre ejecuciones
+          cache-dependency-glob: "uv.lock"   # La caché se invalida al cambiar el lockfile
+
+      - name: Instalar Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Instalar dependencias del proyecto
+        # --frozen: falla si uv.lock no coincide con pyproject.toml (evita sorpresas)
+        run: uv sync --frozen --all-extras --dev --python ${{ matrix.python-version }}
+
+      - name: Ruff (lint)
+        run: uv run ruff check --output-format=github .   # Anota errores directo en el PR
+
+      - name: Ruff (formato)
+        run: uv run ruff format --check .
+
+      - name: Pytest
+        run: uv run pytest -q
+
+# ---------------------------------------------------------------------
+# ALTERNATIVA SIN uv (requirements.txt + pip). Reemplaza los pasos de
+# uv por estos:
+#
+#   - uses: actions/setup-python@v5
+#     with:
+#       python-version: ${{ matrix.python-version }}
+#       cache: pip
+#   - run: pip install -r requirements.txt -r requirements-dev.txt
+#   - run: ruff check --output-format=github .
+#   - run: pytest -q
+# ---------------------------------------------------------------------

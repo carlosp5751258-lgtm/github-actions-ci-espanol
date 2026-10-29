@@ -1,18 +1,33 @@
-# GitHub Actions CI en español — workflow de ejemplo
+# Workflows de GitHub Actions en español (gratis)
 
-Workflow de integración continua para Node.js (lint + tests en matriz 20/22, caché de npm, permisos mínimos), comentado línea por línea en español.
+Workflows de CI comentados línea por línea en español, con permisos mínimos y caché.
 
-## Uso
+**Gratis y de código abierto (MIT).** Úsalo en tus proyectos y en los de tus clientes.
 
-Copia `ejemplos/node-ci.yml` a `.github/workflows/node-ci.yml` en tu repositorio y haz push.
+## Qué incluye
 
-## ¿Quieres el pack completo?
+- `node-ci.yml`: lint y tests en Node 20 y 22 con caché de npm
+- `python-ci.yml`: ruff y pytest con uv en 3.11–3.13
+- `auditoria-dependencias.yml`: revisión semanal de vulnerabilidades
 
-Esta es una **muestra gratuita**. El pack completo está en
-**[Pack GitHub Actions CI en Español (8 workflows: Node, Python, Go, Docker, releases, Pages y auditorías)](https://claudecodees.gumroad.com/l/github-actions-ci)**: paga lo que quieras, desde 2 USD.
+## Instalación
 
-📝 Tutorial paso a paso en español: https://dev.to/carlosp5751258lgtm/tu-primer-ci-en-github-actions-con-matriz-de-versiones-explicado-en-espanol-3l2h
+```bash
+git clone https://github.com/carlosp5751258-lgtm/github-actions-ci-espanol.git
+mkdir -p .github/workflows
+cp github-actions-ci-espanol/.github/workflows/node-ci.yml .github/workflows/   # o el de tu lenguaje
+```
 
-Más recursos gratis: [claude-code-es](https://github.com/carlosp5751258-lgtm/claude-code-es)
+Haz commit y push: el workflow corre solo en cada push y pull request. Cada archivo indica qué cambiar.
 
-Licencia MIT (solo esta muestra).
+## ¿Quieres la versión completa?
+
+Esta es la versión gratis y funciona sola. La **versión Pro** añade:
+
+- 5 workflows más: Go, Docker a GHCR, releases por tag, deploy a GitHub Pages y patrones de caché
+- Guía LEEME con requisitos y ajustes
+
+👉 [Ver la versión Pro](https://claudecodees.gumroad.com/l/github-actions-ci) · paga lo que quieras desde 2 USD. Comprarla también ayuda a que sigamos publicando recursos gratis.
+
+---
+Parte de **[Ctrl+IA](https://carlosp5751258-lgtm.github.io/ctrlia/)**: recursos en español para programar con IA. Hecho por Carlos P.
