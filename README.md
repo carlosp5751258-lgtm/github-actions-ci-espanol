@@ -1,5 +1,7 @@
 # Workflows de GitHub Actions en español (gratis)
 
+🇬🇧 [Read in English](README.en.md)
+
 Workflows de CI comentados línea por línea en español, con permisos mínimos y caché.
 
 **Gratis y de código abierto (MIT).** Úsalo en tus proyectos y en los de tus clientes.
@@ -28,6 +30,10 @@ Esta es la versión gratis y funciona sola. La **versión Pro** añade:
 - Guía LEEME con requisitos y ajustes
 
 👉 [Ver la versión Pro](https://claudecodees.gumroad.com/l/github-actions-ci) · paga lo que quieras desde 2 USD. Comprarla también ayuda a que sigamos publicando recursos gratis.
+
+## Licencia
+
+MIT: puedes usarlo, modificarlo y compartirlo, también en proyectos comerciales. Ver [LICENSE](LICENSE).
 
 ---
 Parte de **[Ctrl+IA](https://ctrlia.dev/)**: recursos en español para programar con IA. Hecho por Carlos P.
